@@ -1,0 +1,506 @@
+/* --- ESTILOS GENERALES Y DISEÑO INFANTIL --- */
+:root {
+    --primary-color: #ff6b6b;
+    --primary-hover: #ff4747;
+    --secondary-color: #4ecdc4;
+    --success-color: #6cbe45;
+    --accent-color: #feca57;
+    --dark-color: #2d3436;
+    --light-bg: rgba(255, 255, 255, 0.85);
+    --border-radius-lg: 24px;
+    --border-radius-md: 16px;
+    --font-family: 'Fredoka', sans-serif;
+    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.1);
+    --shadow-btn: 0 6px 0px rgba(0, 0, 0, 0.15);
+    --shadow-btn-active: 0 2px 0px rgba(0, 0, 0, 0.15);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-family);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+body {
+    background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    color: var(--dark-color);
+    overflow-x: hidden;
+}
+
+/* --- CONTENEDOR PRINCIPAL --- */
+.game-container {
+    width: 100%;
+    max-width: 640px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 6px solid #fff;
+    border-radius: var(--border-radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-soft), inset 0 0 20px rgba(255, 255, 255, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    position: relative;
+}
+
+/* --- ENCABEZADO Y MARCADOR --- */
+.game-header {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.header-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 100%;
+}
+
+.stat-card {
+    background: var(--light-bg);
+    border: 3px solid #fff;
+    border-radius: var(--border-radius-md);
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    font-size: 28px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.stat-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #7f8c8d;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1.1;
+}
+
+/* Barra de progreso de nivel */
+.progress-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--light-bg);
+    padding: 8px 12px;
+    border-radius: var(--border-radius-md);
+    border: 2px solid #fff;
+}
+
+.progress-title {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    color: #576574;
+}
+
+.progress-bar-bg {
+    flex-grow: 1;
+    height: 24px;
+    background: #dfe6e9;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-color), #ff9f43);
+    border-radius: 12px;
+    width: 0%;
+    transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+}
+
+.progress-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(
+        rgba(255, 255, 255, 0.3),
+        rgba(255, 255, 255, 0)
+    );
+}
+
+.progress-text {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 13px;
+    font-weight: 700;
+    color: #2c3e50;
+    text-shadow: 0 1px 1px rgba(255,255,255,0.8);
+}
+
+/* --- LIENZO Y CAPAS SUPERPUESTAS (CANVAS WRAPPER) --- */
+.canvas-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    background: #e8f5e9;
+    border-radius: var(--border-radius-lg);
+    border: 8px solid #8d6e63; /* Borde marrón estilo madera */
+    box-shadow: var(--shadow-soft), inset 0 10px 20px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+
+#gameCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+}
+
+/* Pantallas superpuestas (Overlays) */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(45, 52, 54, 0.5);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+}
+
+.overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.overlay-content {
+    background: white;
+    padding: 30px;
+    border-radius: var(--border-radius-lg);
+    text-align: center;
+    max-width: 85%;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border: 5px solid var(--accent-color);
+    transform: scale(0.8);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.overlay.active .overlay-content {
+    transform: scale(1);
+}
+
+/* --- ANIMACIONES Y ESTILOS DE TEXTO --- */
+.game-title {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #2c3e50;
+    margin-bottom: 12px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.highlight {
+    color: var(--primary-color);
+    font-size: 38px;
+    display: inline-block;
+}
+
+.game-description {
+    font-size: 15px;
+    color: #7f8c8d;
+    margin-bottom: 24px;
+    line-height: 1.4;
+}
+
+.keyboard-hint {
+    margin-top: 15px;
+    font-size: 12px;
+    color: #95a5a6;
+    background: #f8f9fa;
+    padding: 6px 12px;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+/* Botones hermosos con efecto 3D */
+.btn {
+    border: none;
+    border-radius: 50px;
+    padding: 14px 28px;
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    box-shadow: var(--shadow-btn);
+    display: inline-block;
+}
+
+.btn:active {
+    transform: translateY(4px);
+    box-shadow: var(--shadow-btn-active);
+}
+
+.btn-start {
+    background: linear-gradient(135deg, #ff9f43, #ff6b6b);
+    border: 2px solid #fff;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #54a0ff, #2e86de);
+    border: 2px solid #fff;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #1dd1a1, #10ac84);
+    border: 2px solid #fff;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff6b6b, #ee5253);
+    border: 2px solid #fff;
+}
+
+/* Estilos de estados de juego específicos */
+.level-up-title {
+    color: var(--success-color);
+    font-size: 28px;
+    margin: 10px 0;
+}
+
+.badge-animation {
+    font-size: 48px;
+    animation: bounce 1.5s infinite;
+}
+
+.game-over-icon {
+    font-size: 56px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.final-score-box {
+    background: #f1f2f6;
+    border-radius: var(--border-radius-md);
+    padding: 12px;
+    margin: 15px 0 20px 0;
+    border: 2px dashed #ced6e0;
+}
+
+.final-score-box p {
+    font-size: 16px;
+    color: #57606f;
+    margin: 4px 0;
+}
+
+.final-score-box strong {
+    color: #2f3542;
+    font-size: 18px;
+}
+
+.victory-crown {
+    font-size: 56px;
+    animation: pulse 1s infinite alternate;
+}
+
+.victory-title {
+    color: var(--accent-color);
+    font-size: 32px;
+    margin: 10px 0;
+    text-shadow: 0 2px 0px rgba(0,0,0,0.1);
+}
+
+/* --- CONTROLES MÓVILES (D-PAD) --- */
+.mobile-controls {
+    display: none;
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.d-pad {
+    position: relative;
+    width: 180px;
+    height: 180px;
+}
+
+.d-btn {
+    position: absolute;
+    width: 55px;
+    height: 55px;
+    background: linear-gradient(135deg, #feca57, #ff9f43);
+    border: 3px solid #fff;
+    border-radius: 50%;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 0px #d97d00, 0 4px 8px rgba(0,0,0,0.2);
+    transition: all 0.05s ease;
+    outline: none;
+    touch-action: manipulation;
+}
+
+.d-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0px #d97d00, 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.d-btn-up {
+    top: 5px;
+    left: 62.5px;
+}
+
+.d-btn-left {
+    top: 62.5px;
+    left: 5px;
+}
+
+.d-btn-action {
+    top: 62.5px;
+    left: 62.5px;
+    background: linear-gradient(135deg, #a8ff78, #78ffd6);
+    box-shadow: 0 4px 0px #4b8d14, 0 4px 8px rgba(0,0,0,0.2);
+    font-size: 16px;
+}
+.d-btn-action:active {
+    box-shadow: 0 2px 0px #4b8d14, 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.d-btn-right {
+    top: 62.5px;
+    right: 5px;
+}
+
+.d-btn-down {
+    bottom: 5px;
+    left: 62.5px;
+}
+
+/* --- PIE DE PÁGINA --- */
+.game-footer {
+    width: 100%;
+    text-align: center;
+    font-size: 12px;
+    color: #7f8c8d;
+    background: rgba(255,255,255,0.4);
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.5);
+}
+
+/* --- ANIMACIONES --- */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.1); }
+}
+
+.animated-bounce {
+    animation: bounce 3s infinite ease-in-out;
+}
+
+/* --- RESPONSIVIDAD PARA PANTALLAS PEQUEÑAS / MÓVILES --- */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+    
+    .game-container {
+        padding: 16px;
+        gap: 12px;
+        border-radius: var(--border-radius-md);
+        border-width: 4px;
+    }
+
+    .game-title {
+        font-size: 24px;
+    }
+
+    .highlight {
+        font-size: 28px;
+    }
+
+    .overlay-content {
+        padding: 20px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 15px;
+    }
+
+    .header-stats {
+        gap: 6px;
+    }
+
+    .stat-card {
+        padding: 6px 8px;
+        gap: 6px;
+    }
+
+    .stat-icon {
+        font-size: 20px;
+    }
+
+    .stat-value {
+        font-size: 16px;
+    }
+
+    /* Activar controles en pantallas móviles */
+    .mobile-controls {
+        display: flex;
+    }
+    
+    .game-footer {
+        font-size: 10px;
+        padding: 6px 10px;
+    }
+}

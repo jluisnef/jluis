@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>La Súper Viborita Glotona! 🍎🐍 - Juego Infantil</title>
+    <!-- Fuente Fredoka: Redondeada y amigable para niños -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Soporte PWA para instalación en pantalla -->
+    <link rel="manifest" href="instalar/manifest.json">
+    <meta name="theme-color" content="#ff6b6b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Viborita Glotona">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Encabezado del Juego / Marcador -->
+        <header class="game-header">
+            <div class="header-stats">
+                <div class="stat-card" id="stat-score">
+                    <span class="stat-icon">🍎</span>
+                    <div class="stat-text">
+                        <span class="stat-label">Comido</span>
+                        <span class="stat-value" id="score-val">0</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card" id="stat-level">
+                    <span class="stat-icon">⭐</span>
+                    <div class="stat-text">
+                        <span class="stat-label">Nivel</span>
+                        <span class="stat-value" id="level-val">1</span>
+                    </div>
+                </div>
+
+                <div class="stat-card" id="stat-highscore">
+                    <span class="stat-icon">🏆</span>
+                    <div class="stat-text">
+                        <span class="stat-label">Récord</span>
+                        <span class="stat-value" id="highscore-val">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Barra de Progreso para el siguiente nivel -->
+            <div class="progress-container">
+                <span class="progress-title">Meta de Nivel:</span>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
+                    <span class="progress-text" id="progress-text">0 / 10</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Área de Juego (Canvas + Overlays) -->
+        <div class="canvas-wrapper">
+            <canvas id="gameCanvas" width="600" height="400"></canvas>
+
+            <!-- Pantalla de Inicio -->
+            <div id="screen-start" class="overlay active">
+                <div class="overlay-content animated-bounce">
+                    <h1 class="game-title">La Súper Viborita<br><span class="highlight">Glotona! 🐍</span></h1>
+                    <p class="game-description">¡Ayuda a la oruga a comer deliciosas frutas y superar los obstáculos del jardín mágico! 🍓🍌</p>
+                    <button class="btn btn-start" id="btn-play">¡Jugar Ahora! 🎮</button>
+                    <div class="keyboard-hint">
+                        <span>Usa las flechas ⬆️⬇️⬅️➡️ o WASD para moverte</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pantalla de Pausa -->
+            <div id="screen-pause" class="overlay">
+                <div class="overlay-content">
+                    <h2>Juego en Pausa 💤</h2>
+                    <p>La viborita está tomando una siestita...</p>
+                    <button class="btn btn-primary" id="btn-resume">Continuar ▶️</button>
+                </div>
+            </div>
+
+            <!-- Pantalla de Nivel Superado -->
+            <div id="screen-level-up" class="overlay">
+                <div class="overlay-content">
+                    <div class="badge-animation">🎉⭐🎉</div>
+                    <h2 class="level-up-title">¡Nivel Completado!</h2>
+                    <p id="level-up-msg">¡Increíble! Has limpiado el Jardín 1.</p>
+                    <button class="btn btn-success" id="btn-next-level">¡Siguiente Nivel! 🚀</button>
+                </div>
+            </div>
+
+            <!-- Pantalla de Game Over -->
+            <div id="screen-game-over" class="overlay">
+                <div class="overlay-content">
+                    <span class="game-over-icon">😢</span>
+                    <h2>¡Oh no, chocaste!</h2>
+                    <p>¡La viborita se cansó y necesita descansar!</p>
+                    <div class="final-score-box">
+                        <p>Puntuación Final: <strong id="final-score-val">0</strong></p>
+                        <p>Nivel Alcanzado: <strong id="final-level-val">1</strong></p>
+                    </div>
+                    <button class="btn btn-danger" id="btn-restart">Intentar de nuevo 🔁</button>
+                </div>
+            </div>
+
+            <!-- Pantalla de Victoria Final -->
+            <div id="screen-victory" class="overlay">
+                <div class="overlay-content">
+                    <div class="victory-crown">👑🏆✨</div>
+                    <h2 class="victory-title">¡Gran Campeón!</h2>
+                    <p>¡Has completado todos los niveles y la viborita está súper llena y feliz! 🐍❤️</p>
+                    <div class="final-score-box">
+                        <p>Puntos Totales: <strong id="victory-score-val">0</strong></p>
+                    </div>
+                    <button class="btn btn-start" id="btn-victory-restart">Volver a Jugar 🎉</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controles táctiles en pantalla para móviles/tablets -->
+        <div class="mobile-controls">
+            <div class="d-pad">
+                <button class="d-btn d-btn-up" id="ctrl-up" aria-label="Arriba">⬆️</button>
+                <button class="d-btn d-btn-left" id="ctrl-left" aria-label="Izquierda">⬅️</button>
+                <button class="d-btn d-btn-action" id="ctrl-pause" aria-label="Pausa">⏸️</button>
+                <button class="d-btn d-btn-right" id="ctrl-right" aria-label="Derecha">➡️</button>
+                <button class="d-btn d-btn-down" id="ctrl-down" aria-label="Abajo">⬇️</button>
+            </div>
+        </div>
+
+        <!-- Instrucciones en el pie de página -->
+        <footer class="game-footer">
+            <p>💡 Truco: Evita chocar contra las paredes rojas y las rocas 🧱. ¡Come la fruta para crecer!</p>
+        </footer>
+    </div>
+
+    <script src="game.js"></script>
+    
+    <!-- Script para habilitar instalación PWA -->
+    <script src="instalar/pwa.js"></script>
+</body>
+</html>
